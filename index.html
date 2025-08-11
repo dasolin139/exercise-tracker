@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="매일 운동을 기록하고 관리하는 웹앱">
+    <meta name="theme-color" content="#3498db">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="운동 기록">
+    <title>💪 운동 기록 앱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .date-selector {
+            text-align: center;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .date-selector button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .date-selector button:hover {
+            background-color: #2980b9;
+        }
+
+        .date-selector span {
+            font-size: 18px;
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .exercise-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .exercise-card.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .exercise-card h3 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .exercise-card p {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .count-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .exercise-card.active .count-badge {
+            background-color: white;
+            color: #3498db;
+        }
+
+        .daily-record {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .daily-record h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-item .exercise-name {
+            font-weight: 500;
+        }
+
+        .record-item .exercise-count {
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .total-summary {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .total-summary h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-item .total-count {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .stats {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .stats h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .reset-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .reset-button:hover {
+            background-color: #c0392b;
+        }
+
+        @media (min-width: 768px) {
+            .exercise-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .instructions {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💪 운동 기록 앱</h1>
+        
+        <div class="instructions">
+            💡 좌클릭으로 운동 추가, 우클릭으로 운동 빼기
+        </div>
+        
+        <div class="date-selector">
+            <button onclick="changeDate(-1)">◀</button>
+            <span id="currentDate"></span>
+            <button onclick="changeDate(1)">▶</button>
+        </div>
+
+        <div class="exercise-grid">
+            <div class="exercise-card" onclick="incrementExercise('running', this)" oncontextmenu="decrementExercise('running', this); return false;">
+                <h3>🏃 런닝</h3>
+                <p>10분</p>
+                <span class="count-badge" id="running-count">0</span>
+            </div>
+            
+            <div class="exercise-card" onclick="incrementExercise('pushup', this)" oncontextmenu="decrementExercise('pushup', this); return false;">
+                <h3>💪 팔굽혀펴기</h3>
+                <p>10회</p>
+                <span class="count-badge" id="pushup-count">0</span>
+            </div>
+            
+            <div class="exercise-card" onclick="incrementExercise('squat', this)" oncontextmenu="decrementExercise('squat', this); return false;">
+                <h3>🦵 스쿼트</h3>
+                <p>10회</p>
+                <span class="count-badge" id="squat-count">0</span>
+            </div>
+            
+            <div class="exercise-card" onclick="incrementExercise('situp', this)" oncontextmenu="decrementExercise('situp', this); return false;">
+                <h3>🧘 윗몸일으키기</h3>
+                <p>20회</p>
+                <span class="count-badge" id="situp-count">0</span>
+            </div>
+        </div>
+
+        <div class="daily-record">
+            <h2>📝 오늘의 기록</h2>
+            <div class="record-item">
+                <span class="exercise-name">🏃 런닝 (10분)</span>
+                <span class="exercise-count" id="running-record">0회</span>
+            </div>
+            <div class="record-item">
+                <span class="exercise-name">💪 팔굽혀펴기 (10회)</span>
+                <span class="exercise-count" id="pushup-record">0회</span>
+            </div>
+            <div class="record-item">
+                <span class="exercise-name">🦵 스쿼트 (10회)</span>
+                <span class="exercise-count" id="squat-record">0회</span>
+            </div>
+            <div class="record-item">
+                <span class="exercise-name">🧘 윗몸일으키기 (20회)</span>
+                <span class="exercise-count" id="situp-record">0회</span>
+            </div>
+        </div>
+
+        <div class="total-summary">
+            <h2>📊 오늘의 운동 총합</h2>
+            <div class="summary-item">
+                <span>🏃 런닝</span>
+                <span class="total-count" id="running-total">총 0분</span>
+            </div>
+            <div class="summary-item">
+                <span>💪 팔굽혀펴기</span>
+                <span class="total-count" id="pushup-total">총 0회</span>
+            </div>
+            <div class="summary-item">
+                <span>🦵 스쿼트</span>
+                <span class="total-count" id="squat-total">총 0회</span>
+            </div>
+            <div class="summary-item">
+                <span>🧘 윗몸일으키기</span>
+                <span class="total-count" id="situp-total">총 0회</span>
+            </div>
+        </div>
+
+        <div class="stats">
+            <h2>📊 이번 달 통계</h2>
+            <div class="stat-item">
+                <span>총 운동일수</span>
+                <span id="totalDays">0일</span>
+            </div>
+            <div class="stat-item">
+                <span>연속 운동일수</span>
+                <span id="streakDays">0일</span>
+            </div>
+            <div class="stat-item">
+                <span>전날 대비 달성률</span>
+                <span id="completionRate">0%</span>
+            </div>
+        </div>
+
+        <button class="reset-button" onclick="resetToday()">오늘 기록 초기화</button>
+        <button class="reset-button" style="background-color: #9b59b6; margin-top: 10px;" onclick="resetAll()">전체 기록 초기화</button>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let exerciseData = JSON.parse(localStorage.getItem('exerciseData')) || {};
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function displayDate(date) {
+            const options = { month: 'long', day: 'numeric', weekday: 'short' };
+            return date.toLocaleDateString('ko-KR', options);
+        }
+
+        function updateDateDisplay() {
+            document.getElementById('currentDate').textContent = displayDate(currentDate);
+            loadDayData();
+            updateStats();
+            updateTotalSummary();
+        }
+
+        function changeDate(direction) {
+            currentDate.setDate(currentDate.getDate() + direction);
+            updateDateDisplay();
+        }
+
+        function loadDayData() {
+            const dateKey = formatDate(currentDate);
+            const dayData = exerciseData[dateKey] || {};
+            
+            // 각 운동별 카운트 표시
+            document.getElementById('running-count').textContent = dayData.running || 0;
+            document.getElementById('pushup-count').textContent = dayData.pushup || 0;
+            document.getElementById('squat-count').textContent = dayData.squat || 0;
+            document.getElementById('situp-count').textContent = dayData.situp || 0;
+            
+            // 오늘의 기록 표시
+            document.getElementById('running-record').textContent = (dayData.running || 0) + '회';
+            document.getElementById('pushup-record').textContent = (dayData.pushup || 0) + '회';
+            document.getElementById('squat-record').textContent = (dayData.squat || 0) + '회';
+            document.getElementById('situp-record').textContent = (dayData.situp || 0) + '회';
+            
+            // 카드 스타일 업데이트
+            const cards = document.querySelectorAll('.exercise-card');
+            cards[0].classList.toggle('active', (dayData.running || 0) > 0);
+            cards[1].classList.toggle('active', (dayData.pushup || 0) > 0);
+            cards[2].classList.toggle('active', (dayData.squat || 0) > 0);
+            cards[3].classList.toggle('active', (dayData.situp || 0) > 0);
+        }
+
+        function incrementExercise(type, element) {
+            const dateKey = formatDate(currentDate);
+            
+            if (!exerciseData[dateKey]) {
+                exerciseData[dateKey] = {};
+            }
+            
+            // 현재 값을 가져오고 1 증가
+            exerciseData[dateKey][type] = (exerciseData[dateKey][type] || 0) + 1;
+            
+            // 카운트 배지 업데이트
+            const countBadge = document.getElementById(type + '-count');
+            countBadge.textContent = exerciseData[dateKey][type];
+            
+            // 오늘의 기록 업데이트
+            document.getElementById(type + '-record').textContent = exerciseData[dateKey][type] + '회';
+            
+            // 카드 스타일 업데이트
+            element.classList.add('active');
+            
+            saveData();
+            updateStats();
+            updateTotalSummary();
+        }
+
+        function decrementExercise(type, element) {
+            const dateKey = formatDate(currentDate);
+            
+            if (!exerciseData[dateKey] || !exerciseData[dateKey][type] || exerciseData[dateKey][type] <= 0) {
+                return; // 0 이하로 내려가지 않도록
+            }
+            
+            // 현재 값을 가져오고 1 감소
+            exerciseData[dateKey][type] = exerciseData[dateKey][type] - 1;
+            
+            // 카운트 배지 업데이트
+            const countBadge = document.getElementById(type + '-count');
+            countBadge.textContent = exerciseData[dateKey][type];
+            
+            // 오늘의 기록 업데이트
+            document.getElementById(type + '-record').textContent = exerciseData[dateKey][type] + '회';
+            
+            // 카드 스타일 업데이트 (0이면 비활성화)
+            if (exerciseData[dateKey][type] === 0) {
+                element.classList.remove('active');
+            }
+            
+            saveData();
+            updateStats();
+            updateTotalSummary();
+        }
+
+        function updateTotalSummary() {
+            const dateKey = formatDate(currentDate);
+            const dayData = exerciseData[dateKey] || {};
+            
+            // 해당 날짜의 운동 데이터만 사용
+            const totalRunning = dayData.running || 0;
+            const totalPushup = dayData.pushup || 0;
+            const totalSquat = dayData.squat || 0;
+            const totalSitup = dayData.situp || 0;
+            
+            // 총합 표시 업데이트 (클릭 횟수 × 기본 운동량)
+            document.getElementById('running-total').textContent = `총 ${totalRunning}회 (${totalRunning * 10}분)`;
+            document.getElementById('pushup-total').textContent = `총 ${totalPushup}회 (${totalPushup * 10}개)`;
+            document.getElementById('squat-total').textContent = `총 ${totalSquat}회 (${totalSquat * 10}개)`;
+            document.getElementById('situp-total').textContent = `총 ${totalSitup}회 (${totalSitup * 20}개)`;
+        }
+
+        function saveData() {
+            localStorage.setItem('exerciseData', JSON.stringify(exerciseData));
+        }
+
+        function updateStats() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            
+            let totalDays = 0;
+            let completedDays = 0;
+            let streak = 0;
+            let currentStreak = 0;
+            
+            // 월별 통계 계산
+            for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+                const dateKey = formatDate(d);
+                if (exerciseData[dateKey]) {
+                    const dayComplete = exerciseData[dateKey].running > 0 && 
+                                      exerciseData[dateKey].pushup > 0 && 
+                                      exerciseData[dateKey].squat > 0 && 
+                                      exerciseData[dateKey].situp > 0;
+                    
+                    if (dayComplete) {
+                        completedDays++;
+                    }
+                    
+                    if (Object.keys(exerciseData[dateKey]).length > 0) {
+                        totalDays++;
+                    }
+                }
+            }
+            
+            // 연속 운동일수 계산
+            let checkDate = new Date();
+            checkDate.setHours(0, 0, 0, 0);
+            
+            while (true) {
+                const dateKey = formatDate(checkDate);
+                if (exerciseData[dateKey] && 
+                    exerciseData[dateKey].running > 0 && 
+                    exerciseData[dateKey].pushup > 0 && 
+                    exerciseData[dateKey].squat > 0 && 
+                    exerciseData[dateKey].situp > 0) {
+                    currentStreak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            
+            // 전날 대비 달성률 계산
+            const todayKey = formatDate(currentDate);
+            const yesterday = new Date(currentDate);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayKey = formatDate(yesterday);
+            
+            let todayTotal = 0;
+            let yesterdayTotal = 0;
+            
+            if (exerciseData[todayKey]) {
+                todayTotal = (exerciseData[todayKey].running || 0) + 
+                           (exerciseData[todayKey].pushup || 0) + 
+                           (exerciseData[todayKey].squat || 0) + 
+                           (exerciseData[todayKey].situp || 0);
+            }
+            
+            if (exerciseData[yesterdayKey]) {
+                yesterdayTotal = (exerciseData[yesterdayKey].running || 0) + 
+                               (exerciseData[yesterdayKey].pushup || 0) + 
+                               (exerciseData[yesterdayKey].squat || 0) + 
+                               (exerciseData[yesterdayKey].situp || 0);
+            }
+            
+            let completionRate = 0;
+            if (yesterdayTotal > 0) {
+                completionRate = Math.round((todayTotal / yesterdayTotal) * 100);
+            } else if (todayTotal > 0) {
+                completionRate = 100; // 어제 운동 안했고 오늘 했으면 100%
+            }
+            
+            document.getElementById('totalDays').textContent = `${completedDays}일`;
+            document.getElementById('streakDays').textContent = `${currentStreak}일`;
+            document.getElementById('completionRate').textContent = `${completionRate}%`;
+        }
+
+        function resetToday() {
+            if (confirm('오늘의 운동 기록을 초기화하시겠습니까?')) {
+                const dateKey = formatDate(currentDate);
+                delete exerciseData[dateKey];
+                saveData();
+                loadDayData();
+                updateStats();
+                updateTotalSummary();
+            }
+        }
+
+        function resetAll() {
+            if (confirm('모든 운동 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                exerciseData = {};
+                saveData();
+                loadDayData();
+                updateStats();
+                updateTotalSummary();
+            }
+        }
+
+        // 초기 로드
+        updateDateDisplay();
+    </script>
+</body>
+</html>
